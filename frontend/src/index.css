@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary-blue: #2563eb;
+  --color-primary-blue-hover: #1d4ed8;
+  --color-bg-light: #f8fafc;
+  --font-family-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+@layer base {
+  body {
+    @apply bg-bg-light text-gray-900;
+  }
+}
