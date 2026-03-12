@@ -1,63 +1,40 @@
-import express from 'express';
+import express, { Express, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
+import morgan from 'morgan';
 import dotenv from 'dotenv';
-import multer from 'multer';
+import path from 'path';
 
-dotenv.config();
+// Load environment variables
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
-const app = express();
+const app: Express = express();
 const port = process.env.PORT || 5000;
+
+import testRoutes from './routes/testRoutes';
+import analyzeRoutes from './routes/analyzeRoutes';
+import fresherRoutes from './routes/fresherRoutes';
 
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(morgan('dev')); // Logging
 
-// Set up Multer for file uploads (store in memory for immediate processing)
-const upload = multer({ storage: multer.memoryStorage() });
+// Routes
+app.use('/api/test', testRoutes);
+app.use('/api/analyze', analyzeRoutes);
+app.use('/api/fresher', fresherRoutes);
 
-// Basic health check route
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', message: 'ResumeBuddy API is running' });
+// Basic route for testing
+app.get('/', (req: Request, res: Response) => {
+  res.json({ message: 'Welcome to the ResumeBuddy API' });
 });
 
-// Placeholder for Flow 1 (Professional Analysis)
-app.post('/api/analyze', upload.single('resume'), async (req, res) => {
-  try {
-    // We will extract PDF text and call Gemini API here
-    const jobDescription = req.body.jobDescription;
-    
-    // Mock Response
-    res.json({
-      matchScore: 85,
-      atsScore: 70,
-      strengths: ["React", "Node.js"],
-      missingSkills: ["Docker", "AWS"],
-      tips: ["Quantify your impact on previous roles", "Add more keywords from JD"],
-      interviewQuestions: ["Tell me about a time you optimized a React app.", "How do you handle state in large applications?"],
-      roadmap: ["Learn Docker basics", "Build a small full-stack AWS project"]
-    });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to analyze resume' });
-  }
-});
-
-// Placeholder for Flow 2 (Fresher Profile Builder)
-app.post('/api/fresher', async (req, res) => {
-  try {
-    const { name, education, college, skills, projects, certifications, targetRole, jobDescription } = req.body;
-    
-    // Mock Response
-    res.json({
-      profileScore: 65,
-      missingSkills: ["CI/CD", "System Design"],
-      learningPlan: ["Week 1: CI/CD concepts", "Week 2: Basic system design patterns"],
-      resumePreview: "A dynamically generated resume text based on input."
-    });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to generate profile' });
-  }
+// Basic Error Handler
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Something went wrong!' });
 });
 
 app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+  console.log(`[server]: Server is running at http://localhost:${port}`);
 });
